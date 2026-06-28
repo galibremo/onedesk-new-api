@@ -1,0 +1,8 @@
+allowBuilds:
+  '@nestjs/core': true
+  '@swc/core': true
+  esbuild: true
+  unrs-resolver: true
+
+overrides:
+  '@scure/base': ^1.2.6
