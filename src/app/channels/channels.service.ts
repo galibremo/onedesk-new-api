@@ -127,7 +127,7 @@ export class ChannelsService {
 		currentUser: UserWithoutPassword,
 		request: Request,
 	): Promise<FacebookCallbackResponse> {
-		const stateSecret = this.configService.get('FACEBOOK_OAUTH_STATE_SECRET', { infer: true })!;
+		const stateSecret = this.configService.get('FACEBOOK_OAUTH_STATE_SECRET', { infer: true });
 
 		let statePayload: { userId: number; nonce: string };
 		try {

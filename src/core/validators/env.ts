@@ -165,6 +165,12 @@ export const envSchema = z
 		...bruteForceSchema.shape,
 		...passwordPolicySchema.shape,
 		...securityHeadersSchema.shape,
+		...facebookFlagsSchema.shape,
+		...facebookCredentialsSchema.shape,
+		...whatsappFlagsSchema.shape,
+		...whatsappCredentialsSchema.shape,
+		...instagramFlagsSchema.shape,
+		...instagramCredentialsSchema.shape,
 	})
 	.superRefine((data, ctx) => {
 		if (data.CACHE_STORE === 'redis' && !data.REDIS_URL) {
