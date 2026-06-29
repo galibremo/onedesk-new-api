@@ -11,6 +11,7 @@ import { UsersModule } from './app/users/users.module';
 import { SystemModule } from './app/system/system.module';
 import { SmtpModule } from './app/smtp/smtp.module';
 import { StatusModule } from './app/status/status.module';
+import { ChannelsModule } from './app/channels/channels.module';
 import { ConfigurableThrottlerGuard } from './common/guards/configurable-throttler.guard';
 import { ZodValidationPipe } from './common/pipes/zod-validation.pipe';
 import { validateEnv } from './core/validators/env';
@@ -52,6 +53,7 @@ import { SecurityStoreModule } from './core/security-store/security-store.module
 		SmtpModule,
 		HealthModule,
 		StatusModule,
+		ChannelsModule,
 	],
 	providers: [
 		{

@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { randomBytes } from 'crypto';
 
-import type { EnvType } from '../../../core/validators/env';
+import type { EnvType } from '../../../../core/validators/env';
 import { FACEBOOK_OAUTH_DIALOG_URL, FACEBOOK_PERMISSIONS } from '../constants/facebook.constants';
 import type {
 	OAuthUrlResult,
@@ -11,7 +11,7 @@ import type {
 	RefreshResult,
 	SocialProviderInterface,
 	TokenResult,
-} from '../interfaces/social-provider.interface';
+} from '../interfaces/facebook-provider.interface';
 import {
 	exchangeCodeForToken,
 	exchangeForLongLivedToken,
@@ -56,11 +56,7 @@ export class FacebookGraphProvider implements SocialProviderInterface {
 		const appSecret = this.configService.get('FACEBOOK_APP_SECRET', { infer: true })!;
 
 		const shortToken = await exchangeCodeForToken(appId, appSecret, code, redirectUri);
-		const longLived = await exchangeForLongLivedToken(
-			appId,
-			appSecret,
-			shortToken.access_token,
-		);
+		const longLived = await exchangeForLongLivedToken(appId, appSecret, shortToken.access_token);
 		const facebookUserId = await getFacebookUserId(longLived.accessToken);
 
 		return {
@@ -84,11 +80,7 @@ export class FacebookGraphProvider implements SocialProviderInterface {
 		await revokeAppAccess(facebookUserId, accessToken);
 	}
 
-	async subscribeWebhook(
-		pageId: string,
-		pageAccessToken: string,
-		fields: string[],
-	): Promise<void> {
+	async subscribeWebhook(pageId: string, pageAccessToken: string, fields: string[]): Promise<void> {
 		await subscribePageToWebhook(pageId, pageAccessToken, fields);
 	}
 }

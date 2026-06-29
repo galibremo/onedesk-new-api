@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { randomBytes } from 'crypto';
 
-import type { EnvType } from '../../../core/validators/env';
+import type { EnvType } from '../../../../core/validators/env';
 import { WHATSAPP_OAUTH_DIALOG_URL, WHATSAPP_PERMISSIONS } from '../constants/whatsapp.constants';
 import type {
 	OAuthUrlResult,

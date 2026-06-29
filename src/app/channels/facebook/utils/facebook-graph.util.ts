@@ -1,5 +1,9 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import type { PageInfo, RefreshResult, TokenResult } from '../interfaces/social-provider.interface';
+import type {
+	PageInfo,
+	RefreshResult,
+	TokenResult,
+} from '../interfaces/facebook-provider.interface';
 import { FACEBOOK_GRAPH_BASE_URL } from '../constants/facebook.constants';
 
 async function graphFetch<T>(url: string, options?: RequestInit): Promise<T> {
@@ -45,9 +49,7 @@ export async function exchangeForLongLivedToken(
 	const data = await graphFetch<{ access_token: string; expires_in?: number }>(
 		`${FACEBOOK_GRAPH_BASE_URL}/oauth/access_token?${params.toString()}`,
 	);
-	const expiresAt = data.expires_in
-		? new Date(Date.now() + data.expires_in * 1000)
-		: null;
+	const expiresAt = data.expires_in ? new Date(Date.now() + data.expires_in * 1000) : null;
 	return { accessToken: data.access_token, expiresAt };
 }
 
@@ -106,10 +108,7 @@ async function fetchPageList(endpoint: string, accessToken: string): Promise<Pag
 
 export async function getManagedPages(accessToken: string): Promise<PageInfo[]> {
 	// Personal pages (direct page admin role)
-	const personalPages = await fetchPageList(
-		`${FACEBOOK_GRAPH_BASE_URL}/me/accounts`,
-		accessToken,
-	);
+	const personalPages = await fetchPageList(`${FACEBOOK_GRAPH_BASE_URL}/me/accounts`, accessToken);
 	if (personalPages.length > 0) return personalPages;
 
 	// Fallback: pages managed through Business Manager
@@ -133,10 +132,7 @@ export async function getManagedPages(accessToken: string): Promise<PageInfo[]> 
 	}
 }
 
-export async function revokeAppAccess(
-	facebookUserId: string,
-	accessToken: string,
-): Promise<void> {
+export async function revokeAppAccess(facebookUserId: string, accessToken: string): Promise<void> {
 	const params = new URLSearchParams({ access_token: accessToken });
 	await graphFetch<{ success: boolean }>(
 		`${FACEBOOK_GRAPH_BASE_URL}/${facebookUserId}/permissions?${params.toString()}`,

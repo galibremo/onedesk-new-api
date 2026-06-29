@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { randomBytes } from 'crypto';
 
-import type { EnvType } from '../../../core/validators/env';
+import type { EnvType } from '../../../../core/validators/env';
 import { INSTAGRAM_OAUTH_DIALOG_URL, INSTAGRAM_PERMISSIONS } from '../constants/instagram.constants';
 import type {
 	OAuthUrlResult,
