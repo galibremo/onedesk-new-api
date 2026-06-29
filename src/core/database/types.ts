@@ -23,12 +23,6 @@ import {
 	instagramAccounts,
 	whatsappAccounts,
 } from './schema/channel.schema';
-import {
-	organizations,
-	organizationMembers,
-	organizationRoleEnum,
-	organizationMemberStatusEnum,
-} from './schema/organization.schema';
 
 /**
  * Schema Types
@@ -51,9 +45,6 @@ export type FacebookAccountSchemaType = InferSelectModel<typeof facebookAccounts
 export type InstagramAccountSchemaType = InferSelectModel<typeof instagramAccounts>;
 export type WhatsAppAccountSchemaType = InferSelectModel<typeof whatsappAccounts>;
 
-export type OrganizationSchemaType = InferSelectModel<typeof organizations>;
-export type OrganizationMemberSchemaType = InferSelectModel<typeof organizationMembers>;
-
 /**
  * Enum Schema Types
  */
@@ -61,5 +52,3 @@ export type RoleTypeEnum = (typeof roleTypeEnum.enumValues)[number];
 export type FacebookPageStatusEnum = (typeof facebookPageStatusEnum.enumValues)[number];
 export type ChannelTypeEnum = (typeof channelTypeEnum.enumValues)[number];
 export type ChannelStatusEnum = (typeof channelStatusEnum.enumValues)[number];
-export type OrgRoleEnum = (typeof organizationRoleEnum.enumValues)[number];
-export type OrgMemberStatusEnum = (typeof organizationMemberStatusEnum.enumValues)[number];

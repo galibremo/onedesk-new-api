@@ -7,7 +7,6 @@ import * as EmailLogSchema from './schema/email-log.schema';
 import * as EmailTemplateSchema from './schema/email-template.schema';
 import * as EnumSchema from './schema/enum.schema';
 import * as MediaSchema from './schema/media.schema';
-import * as OrganizationSchema from './schema/organization.schema';
 import * as RelationSchema from './schema/relation.schema';
 import * as SecurityStoreSchema from './schema/security-store.schema';
 import * as SmtpProviderSchema from './schema/smtp-provider.schema';
@@ -21,7 +20,6 @@ const schema = {
 	...EmailTemplateSchema,
 	...EnumSchema,
 	...MediaSchema,
-	...OrganizationSchema,
 	...RelationSchema,
 	...SecurityStoreSchema,
 	...SmtpProviderSchema,
