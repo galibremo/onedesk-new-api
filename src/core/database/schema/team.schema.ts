@@ -6,6 +6,7 @@ import {
 	text,
 	timestamp,
 	unique,
+	uniqueIndex,
 	uuid,
 	varchar,
 } from 'drizzle-orm/pg-core';
@@ -58,5 +59,5 @@ export const teamMembers = pgTable(
 		role: teamRoleEnum('role').notNull(),
 		status: teamMemberStatusEnum('status').notNull().default('INVITED'),
 	},
-	table => [unique('team_users_role_unique').on(table.teamId, table.userId, table.role)],
+	table => [uniqueIndex('team_members_role_unique').on(table.teamId, table.userId, table.role)],
 );

@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import type { Request } from 'express';
 
 import { conflictError, notFoundError } from '../../core/errors/domain-error';
-import type { UserWithoutPassword } from '../auth/auth.types';
 import { AuditLogService } from '../audit-log/audit-log.service';
+import type { UserWithoutPassword } from '../auth/auth.types';
 import { mapTeamManagementResponse, mapTeamMemberResponse } from './team.mapper';
 import { TeamPolicy } from './team.policy';
 import { TeamRepository } from './team.repository';
@@ -45,10 +45,7 @@ export class TeamService {
 		};
 	}
 
-	async getTeamById(
-		publicId: string,
-		currentUser: UserWithoutPassword,
-	): Promise<TeamManagementResponse> {
+	async getTeamById(publicId: string): Promise<TeamManagementResponse> {
 		const team = await this.findActiveTeamByPublicId(publicId);
 		const row = await this.teamRepository.findTeamManagementRow(team.id);
 
@@ -132,11 +129,7 @@ export class TeamService {
 		TeamPolicy.assertCanManageTeam(currentUser, team.ownerId);
 
 		if (data.name && data.name !== team.name) {
-			const existing = await this.teamRepository.findTeamByName(
-				data.name,
-				team.ownerId,
-				team.id,
-			);
+			const existing = await this.teamRepository.findTeamByName(data.name, team.ownerId, team.id);
 			if (existing) {
 				throw conflictError('team_name_exists', 'A team with this name already exists.');
 			}
@@ -203,7 +196,6 @@ export class TeamService {
 	async listTeamMembers(
 		publicId: string,
 		query: TeamMemberListQueryDto,
-		currentUser: UserWithoutPassword,
 	): Promise<TeamMemberListResponse> {
 		const team = await this.findActiveTeamByPublicId(publicId);
 		const result = await this.teamRepository.listTeamMembers(team.id, query);
@@ -354,7 +346,7 @@ export class TeamService {
 			throw notFoundError('not_a_team_member', 'You are not a member of this team.');
 		}
 
-		await this.teamRepository.updateUserCurrentTeam(currentUser.id, team.id, member.role);
+		await this.teamRepository.updateUserCurrentTeam(currentUser.id, team.publicId, member.role);
 
 		await this.auditLogService.logAction({
 			actor: currentUser,

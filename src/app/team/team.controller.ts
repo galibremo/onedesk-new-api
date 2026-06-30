@@ -64,9 +64,8 @@ export class TeamController {
 	@Get(':id')
 	async getTeam(
 		@Param('id', ParseUUIDPipe) id: string,
-		@CurrentUser() currentUser: UserWithoutPassword,
 	): Promise<ApiResponse<TeamManagementResponse>> {
-		const team = await this.teamService.getTeamById(id, currentUser);
+		const team = await this.teamService.getTeamById(id);
 
 		return createApiResponse(HttpStatus.OK, 'Team fetched successfully', team);
 	}
@@ -120,9 +119,8 @@ export class TeamController {
 	async listTeamMembers(
 		@Param('id', ParseUUIDPipe) id: string,
 		@Query(new ZodValidationPipe(teamMemberListQuerySchema)) query: TeamMemberListQueryDto,
-		@CurrentUser() currentUser: UserWithoutPassword,
 	): Promise<ApiResponse<TeamMemberListResponse>> {
-		const result = await this.teamService.listTeamMembers(id, query, currentUser);
+		const result = await this.teamService.listTeamMembers(id, query);
 
 		return createApiResponse(HttpStatus.OK, 'Team members fetched successfully', result);
 	}

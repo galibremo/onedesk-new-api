@@ -1,27 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { SQL } from 'drizzle-orm';
-import {
-	and,
-	asc,
-	count,
-	desc,
-	eq,
-	gte,
-	ilike,
-	inArray,
-	isNull,
-	lte,
-	or,
-	sql,
-} from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, ilike, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 import { DATABASE_CONNECTION } from '../../core/database/connection';
 import { orderByColumn } from '../../core/database/helpers';
 import schema from '../../core/database/schema';
-import type { TeamSchemaType, TeamMemberStatusEnum, TeamRoleEnum, UserSchemaType } from '../../core/database/types';
-import type { TeamManagementRow, TeamMemberRow } from './team.types';
+import type {
+	TeamMemberStatusEnum,
+	TeamRoleEnum,
+	TeamSchemaType,
+	UserSchemaType,
+} from '../../core/database/types';
 import type { TeamListQueryDto, TeamMemberListQueryDto } from './team.schema';
+import type { TeamManagementRow, TeamMemberRow } from './team.types';
 
 export type TeamDatabase = NodePgDatabase<typeof schema>;
 
@@ -143,7 +135,9 @@ export class TeamRepository {
 		return result.length;
 	}
 
-	async findTeamMembersByTeamId(teamId: number): Promise<Array<{ userId: number; role: TeamRoleEnum }>> {
+	async findTeamMembersByTeamId(
+		teamId: number,
+	): Promise<Array<{ userId: number; role: TeamRoleEnum }>> {
 		return this.db
 			.select({ userId: schema.teamMembers.userId, role: schema.teamMembers.role })
 			.from(schema.teamMembers)
@@ -223,29 +217,26 @@ export class TeamRepository {
 		const result = await this.db
 			.delete(schema.teamMembers)
 			.where(
-				and(
-					eq(schema.teamMembers.teamId, teamId),
-					inArray(schema.teamMembers.userId, userIds),
-				),
+				and(eq(schema.teamMembers.teamId, teamId), inArray(schema.teamMembers.userId, userIds)),
 			)
 			.returning();
 
 		return result.length;
 	}
 
-	async findTeamMember(teamId: number, userId: number): Promise<{ role: TeamRoleEnum } | undefined> {
+	async findTeamMember(
+		teamId: number,
+		userId: number,
+	): Promise<{ role: TeamRoleEnum } | undefined> {
 		return this.db.query.teamMembers.findFirst({
-			where: and(
-				eq(schema.teamMembers.teamId, teamId),
-				eq(schema.teamMembers.userId, userId),
-			),
+			where: and(eq(schema.teamMembers.teamId, teamId), eq(schema.teamMembers.userId, userId)),
 			columns: { role: true },
 		});
 	}
 
 	async updateUserCurrentTeam(
 		userId: number,
-		teamId: number | null,
+		teamId: string | null,
 		role: TeamRoleEnum | null,
 	): Promise<void> {
 		await this.db
@@ -342,7 +333,10 @@ export class TeamRepository {
 		return orderByColumn(schema.team, sort, direction);
 	}
 
-	private getListMembersWhere(teamId: number, query: TeamMemberListQueryDto): SQL<unknown> | undefined {
+	private getListMembersWhere(
+		teamId: number,
+		query: TeamMemberListQueryDto,
+	): SQL<unknown> | undefined {
 		const q = query.search ? `%${query.search}%` : undefined;
 		const searchExists = q
 			? or(ilike(schema.users.name, q), ilike(schema.users.email, q))
@@ -370,7 +364,9 @@ export class TeamRepository {
 		}
 
 		if (sort === 'status') {
-			return direction === 'desc' ? desc(schema.teamMembers.status) : asc(schema.teamMembers.status);
+			return direction === 'desc'
+				? desc(schema.teamMembers.status)
+				: asc(schema.teamMembers.status);
 		}
 
 		return orderByColumn(schema.users, sort, direction);
