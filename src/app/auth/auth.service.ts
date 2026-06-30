@@ -6,24 +6,17 @@ import type { UploadApiResponse } from 'cloudinary';
 import { randomBytes } from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 
-import {
-	badRequestError,
-	notFoundError,
-	unauthorizedError,
-} from '../../core/errors/domain-error';
 import { magicLinkTimeout, sessionTimeout } from '../../common/helpers/constant.helper';
-import { EnvType } from '../../core/validators/env';
 import { CryptoService } from '../../core/crypto/crypto.service';
+import { badRequestError, notFoundError, unauthorizedError } from '../../core/errors/domain-error';
+import { EnvType } from '../../core/validators/env';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { CloudinaryImageService } from '../media/services/cloudinary.service';
 import { SystemService } from '../system/system.service';
-import { MagicLinkEmail } from './emails/magic-link.email';
-import { WelcomeEmail } from './emails/welcome.email';
-import { SessionService } from './session/session.service';
 import { stripUserPassword } from './auth.mapper';
+import { AuthPolicy } from './auth.policy';
 import { AUTH_CLOUDINARY_SERVICE } from './auth.providers';
 import { AuthRepository, type AuthDbClient } from './auth.repository';
-import type { LoginDto, UpdateProfileDto } from './schemas/auth.schema';
 import type {
 	CreateUser,
 	MagicLinkSessionInfo,
@@ -31,7 +24,10 @@ import type {
 	UserWithoutPassword,
 	VerifiedGoogleProfile,
 } from './auth.types';
-import { AuthPolicy } from './auth.policy';
+import { MagicLinkEmail } from './emails/magic-link.email';
+import { WelcomeEmail } from './emails/welcome.email';
+import type { LoginDto, UpdateProfileDto } from './schemas/auth.schema';
+import { SessionService } from './session/session.service';
 
 @Injectable()
 export class AuthService {
@@ -433,6 +429,8 @@ export class AuthService {
 			emailVerified: profile.emailVerified,
 			phone: null,
 			role: 'USER',
+			currentTeamId: null,
+			currentTeamRole: null,
 			isApproved,
 		});
 

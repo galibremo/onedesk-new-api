@@ -23,6 +23,8 @@ import {
 	instagramAccounts,
 	whatsappAccounts,
 } from './schema/channel.schema';
+import { teamRoleEnum } from './schema/auth.schema';
+import { team, teamMembers, teamStatusEnum, teamMemberStatusEnum } from './schema/team.schema';
 
 /**
  * Schema Types
@@ -52,3 +54,9 @@ export type RoleTypeEnum = (typeof roleTypeEnum.enumValues)[number];
 export type FacebookPageStatusEnum = (typeof facebookPageStatusEnum.enumValues)[number];
 export type ChannelTypeEnum = (typeof channelTypeEnum.enumValues)[number];
 export type ChannelStatusEnum = (typeof channelStatusEnum.enumValues)[number];
+export type TeamRoleEnum = (typeof teamRoleEnum.enumValues)[number];
+export type TeamStatusEnum = (typeof teamStatusEnum.enumValues)[number];
+export type TeamMemberStatusEnum = (typeof teamMemberStatusEnum.enumValues)[number];
+
+export type TeamSchemaType = InferSelectModel<typeof team>;
+export type TeamMemberSchemaType = InferSelectModel<typeof teamMembers>;

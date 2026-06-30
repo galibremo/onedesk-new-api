@@ -5,6 +5,7 @@ import {
 	index,
 	integer,
 	jsonb,
+	pgEnum,
 	pgTable,
 	serial,
 	text,
@@ -15,6 +16,8 @@ import {
 } from 'drizzle-orm/pg-core';
 import { timestamps } from '../helpers';
 import { roleTypeEnum } from './enum.schema';
+
+export const teamRoleEnum = pgEnum('team_role', ['TEAM_LEAD', 'AGENT']);
 
 export const users = pgTable(
 	'users',
@@ -32,6 +35,8 @@ export const users = pgTable(
 		twoFactorSecretEncrypted: text('two_factor_secret_encrypted'),
 		role: roleTypeEnum('role').default('USER').notNull(),
 		isApproved: boolean('is_approved').default(true).notNull(),
+		currentTeamId: integer('current_team_id'),
+		currentTeamRole: teamRoleEnum('current_team_role'),
 		...timestamps,
 	},
 	table => [

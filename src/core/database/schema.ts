@@ -11,6 +11,7 @@ import * as RelationSchema from './schema/relation.schema';
 import * as SecurityStoreSchema from './schema/security-store.schema';
 import * as SmtpProviderSchema from './schema/smtp-provider.schema';
 import * as SystemSchema from './schema/system.schema';
+import * as TeamSchema from './schema/team.schema';
 
 const schema = {
 	...AuditLogSchema,
@@ -24,6 +25,7 @@ const schema = {
 	...SecurityStoreSchema,
 	...SmtpProviderSchema,
 	...SystemSchema,
+	...TeamSchema,
 };
 
 export default schema;
