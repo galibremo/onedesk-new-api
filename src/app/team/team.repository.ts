@@ -233,6 +233,30 @@ export class TeamRepository {
 		return result.length;
 	}
 
+	async findTeamMember(teamId: number, userId: number): Promise<{ role: TeamRoleEnum } | undefined> {
+		return this.db.query.teamMembers.findFirst({
+			where: and(
+				eq(schema.teamMembers.teamId, teamId),
+				eq(schema.teamMembers.userId, userId),
+			),
+			columns: { role: true },
+		});
+	}
+
+	async updateUserCurrentTeam(
+		userId: number,
+		teamId: number | null,
+		role: TeamRoleEnum | null,
+	): Promise<void> {
+		await this.db
+			.update(schema.users)
+			.set({
+				currentTeamId: teamId,
+				currentTeamRole: role,
+			})
+			.where(eq(schema.users.id, userId));
+	}
+
 	async findTeamManagementRow(teamId: number): Promise<TeamManagementRow | undefined> {
 		const memberCountSql = this.memberCountSql();
 

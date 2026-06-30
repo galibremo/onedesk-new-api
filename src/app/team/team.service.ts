@@ -20,6 +20,7 @@ import type {
 	AddMembersResponse,
 	ArchiveTeamResponse,
 	RemoveMembersResponse,
+	SelectTeamResponse,
 	TeamListResponse,
 	TeamManagementResponse,
 	TeamMemberListResponse,
@@ -338,6 +339,36 @@ export class TeamService {
 		if (!member) throw notFoundError('member_not_found', 'Team member not found.');
 
 		return mapTeamMemberResponse(member);
+	}
+
+	async selectTeam(
+		publicId: string,
+		currentUser: UserWithoutPassword,
+		request?: Request,
+	): Promise<SelectTeamResponse> {
+		const team = await this.findActiveTeamByPublicId(publicId);
+
+		const member = await this.teamRepository.findTeamMember(team.id, currentUser.id);
+
+		if (!member) {
+			throw notFoundError('not_a_team_member', 'You are not a member of this team.');
+		}
+
+		await this.teamRepository.updateUserCurrentTeam(currentUser.id, team.id, member.role);
+
+		await this.auditLogService.logAction({
+			actor: currentUser,
+			action: 'TEAM_SELECTED',
+			targetType: 'team',
+			targetId: team.publicId,
+			metadata: { teamName: team.name },
+			request,
+		});
+
+		return {
+			currentTeamId: team.publicId,
+			currentTeamRole: member.role,
+		};
 	}
 
 	private async findActiveTeamByPublicId(publicId: string) {

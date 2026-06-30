@@ -73,3 +73,8 @@ export interface AddMembersResponse {
 export interface RemoveMembersResponse {
 	removed: number;
 }
+
+export interface SelectTeamResponse {
+	currentTeamId: string | null;
+	currentTeamRole: TeamRoleEnum | null;
+}
