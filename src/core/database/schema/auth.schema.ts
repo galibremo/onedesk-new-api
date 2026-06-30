@@ -35,8 +35,6 @@ export const users = pgTable(
 		twoFactorSecretEncrypted: text('two_factor_secret_encrypted'),
 		role: roleTypeEnum('role').default('USER').notNull(),
 		isApproved: boolean('is_approved').default(true).notNull(),
-		currentTeamId: uuid('current_team_id'),
-		currentTeamRole: teamRoleEnum('current_team_role'),
 		...timestamps,
 	},
 	table => [

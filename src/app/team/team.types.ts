@@ -1,10 +1,15 @@
-import type { TeamSchemaType, TeamRoleEnum, TeamStatusEnum, TeamMemberStatusEnum } from '../../core/database/types';
+import type {
+	TeamMemberStatusEnum,
+	TeamRoleEnum,
+	TeamSchemaType,
+	TeamStatusEnum,
+} from '../../core/database/types';
 
-export type { TeamRoleEnum, TeamStatusEnum, TeamMemberStatusEnum };
+export type { TeamMemberStatusEnum, TeamRoleEnum, TeamStatusEnum };
 
 export type TeamManagementRow = Pick<
 	TeamSchemaType,
-	'id' | 'publicId' | 'name' | 'slug' | 'status' | 'deletedAt' | 'createdAt' | 'updatedAt'
+	'id' | 'publicId' | 'name' | 'status' | 'deletedAt' | 'createdAt' | 'updatedAt'
 > & {
 	memberCount: number;
 	ownerId: number | null;

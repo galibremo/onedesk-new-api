@@ -20,7 +20,6 @@ import type {
 	AddMembersResponse,
 	ArchiveTeamResponse,
 	RemoveMembersResponse,
-	SelectTeamResponse,
 	TeamListResponse,
 	TeamManagementResponse,
 	TeamMemberListResponse,
@@ -66,11 +65,8 @@ export class TeamService {
 			throw conflictError('team_name_exists', 'A team with this name already exists.');
 		}
 
-		const slug = await this.slugGenerator(data.name);
-
 		const created = await this.teamRepository.createTeam({
 			name: data.name,
-			slug,
 			ownerId: currentUser.id,
 			status: 'ACTIVE',
 		});
@@ -108,7 +104,7 @@ export class TeamService {
 			action: 'TEAM_CREATED',
 			targetType: 'team',
 			targetId: created.publicId,
-			metadata: { name: created.name, slug: created.slug },
+			metadata: { name: created.name },
 			request,
 		});
 
@@ -135,13 +131,10 @@ export class TeamService {
 			}
 		}
 
-		const updates: Partial<{ name: string; slug: string; status: 'ACTIVE' | 'INACTIVE' }> = {};
+		const updates: Partial<{ name: string; status: 'ACTIVE' | 'INACTIVE' }> = {};
 
 		if (data.name) {
 			updates.name = data.name;
-			if (data.name !== team.name) {
-				updates.slug = await this.slugGenerator(data.name);
-			}
 		}
 
 		if (data.status) {
@@ -333,56 +326,6 @@ export class TeamService {
 		return mapTeamMemberResponse(member);
 	}
 
-	async selectTeam(
-		publicId: string,
-		currentUser: UserWithoutPassword,
-		request?: Request,
-	): Promise<SelectTeamResponse> {
-		const team = await this.findActiveTeamByPublicId(publicId);
-
-		const member = await this.teamRepository.findTeamMember(team.id, currentUser.id);
-
-		if (!member) {
-			throw notFoundError('not_a_team_member', 'You are not a member of this team.');
-		}
-
-		await this.teamRepository.updateUserCurrentTeam(currentUser.id, team.publicId, member.role);
-
-		await this.auditLogService.logAction({
-			actor: currentUser,
-			action: 'TEAM_SELECTED',
-			targetType: 'team',
-			targetId: team.publicId,
-			metadata: { teamName: team.name },
-			request,
-		});
-
-		return {
-			currentTeamId: team.publicId,
-			currentTeamRole: member.role,
-		};
-	}
-
-	async deselectTeam(
-		currentUser: UserWithoutPassword,
-		request?: Request,
-	): Promise<SelectTeamResponse> {
-		await this.teamRepository.updateUserCurrentTeam(currentUser.id, null, null);
-
-		await this.auditLogService.logAction({
-			actor: currentUser,
-			action: 'TEAM_DESELECTED',
-			targetType: 'team',
-			targetId: '',
-			request,
-		});
-
-		return {
-			currentTeamId: null,
-			currentTeamRole: null,
-		};
-	}
-
 	private async findActiveTeamByPublicId(publicId: string) {
 		const team = await this.teamRepository.findTeamByPublicId(publicId);
 
@@ -391,24 +334,5 @@ export class TeamService {
 		}
 
 		return team;
-	}
-
-	private async slugGenerator(name: string): Promise<string> {
-		const base =
-			name
-				.toLowerCase()
-				.trim()
-				.replace(/[^\w\s-]/g, '')
-				.replace(/[\s_]+/g, '-')
-				.replace(/^-+|-+$/g, '') || 'team';
-
-		let slug = base;
-		let counter = 1;
-
-		while (await this.teamRepository.slugExists(slug)) {
-			slug = `${base}-${counter++}`;
-		}
-
-		return slug;
 	}
 }

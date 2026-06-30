@@ -40,7 +40,6 @@ import type {
 	AddMembersResponse,
 	ArchiveTeamResponse,
 	RemoveMembersResponse,
-	SelectTeamResponse,
 	TeamListResponse,
 	TeamManagementResponse,
 	TeamMemberListResponse,
@@ -59,6 +58,16 @@ export class TeamController {
 		const result = await this.teamService.listTeams(query);
 
 		return createApiResponse(HttpStatus.OK, 'Teams fetched successfully', result);
+	}
+
+	@Get(':id/members')
+	async listTeamMembers(
+		@Param('id', ParseUUIDPipe) id: string,
+		@Query(new ZodValidationPipe(teamMemberListQuerySchema)) query: TeamMemberListQueryDto,
+	): Promise<ApiResponse<TeamMemberListResponse>> {
+		const result = await this.teamService.listTeamMembers(id, query);
+
+		return createApiResponse(HttpStatus.OK, 'Team members fetched successfully', result);
 	}
 
 	@Get(':id')
@@ -102,37 +111,6 @@ export class TeamController {
 		const result = await this.teamService.archiveTeam(id, currentUser, request);
 
 		return createApiResponse(HttpStatus.OK, 'Team archived successfully', result);
-	}
-
-	@Post('deselect')
-	async deselectTeam(
-		@CurrentUser() currentUser: UserWithoutPassword,
-		@Request() request: ExpressRequest,
-	): Promise<ApiResponse<SelectTeamResponse>> {
-		const result = await this.teamService.deselectTeam(currentUser, request);
-
-		return createApiResponse(HttpStatus.OK, 'Team deselected successfully', result);
-	}
-
-	@Post(':id/select')
-	async selectTeam(
-		@Param('id', ParseUUIDPipe) id: string,
-		@CurrentUser() currentUser: UserWithoutPassword,
-		@Request() request: ExpressRequest,
-	): Promise<ApiResponse<SelectTeamResponse>> {
-		const result = await this.teamService.selectTeam(id, currentUser, request);
-
-		return createApiResponse(HttpStatus.OK, 'Team selected successfully', result);
-	}
-
-	@Get(':id/members')
-	async listTeamMembers(
-		@Param('id', ParseUUIDPipe) id: string,
-		@Query(new ZodValidationPipe(teamMemberListQuerySchema)) query: TeamMemberListQueryDto,
-	): Promise<ApiResponse<TeamMemberListResponse>> {
-		const result = await this.teamService.listTeamMembers(id, query);
-
-		return createApiResponse(HttpStatus.OK, 'Team members fetched successfully', result);
 	}
 
 	@Post(':id/members')

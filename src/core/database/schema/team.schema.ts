@@ -3,7 +3,6 @@ import {
 	pgEnum,
 	pgTable,
 	serial,
-	text,
 	timestamp,
 	unique,
 	uniqueIndex,
@@ -27,7 +26,6 @@ export const team = pgTable(
 		id: serial('id').primaryKey().notNull(),
 		publicId: uuid('public_id').defaultRandom().notNull().unique(),
 		name: varchar('name', { length: 255 }).notNull(),
-		slug: text('slug'),
 		ownerId: integer('owner_id')
 			.notNull()
 			.references(() => users.id, {
@@ -37,10 +35,7 @@ export const team = pgTable(
 		deletedAt: timestamp('deleted_at', { withTimezone: true }),
 		...timestamps,
 	},
-	table => [
-		unique('team_slug_unique').on(table.slug),
-		unique('team_name_owner_unique').on(table.ownerId, table.name),
-	],
+	table => [unique('team_name_owner_unique').on(table.ownerId, table.name)],
 );
 
 export const teamMembers = pgTable(

@@ -45,15 +45,6 @@ export class TeamRepository {
 		});
 	}
 
-	async slugExists(slug: string): Promise<boolean> {
-		const result = await this.db.query.team.findFirst({
-			where: eq(schema.team.slug, slug),
-			columns: { id: true },
-		});
-
-		return result !== undefined;
-	}
-
 	async findUsersByPublicIds(publicIds: string[]): Promise<UserSchemaType[]> {
 		if (publicIds.length === 0) return [];
 
@@ -86,7 +77,6 @@ export class TeamRepository {
 					schema.team.id,
 					schema.team.publicId,
 					schema.team.name,
-					schema.team.slug,
 					schema.team.status,
 					schema.team.ownerId,
 					schema.team.deletedAt,
@@ -146,7 +136,7 @@ export class TeamRepository {
 
 	async updateTeam(
 		teamId: number,
-		data: Partial<Pick<typeof schema.team.$inferInsert, 'name' | 'slug' | 'status'>>,
+		data: Partial<Pick<typeof schema.team.$inferInsert, 'name' | 'status'>>,
 	): Promise<TeamSchemaType | undefined> {
 		return this.db
 			.update(schema.team)
@@ -159,7 +149,7 @@ export class TeamRepository {
 	async archiveTeam(teamId: number, archivedName: string): Promise<TeamSchemaType | undefined> {
 		return this.db
 			.update(schema.team)
-			.set({ deletedAt: new Date(), name: archivedName, slug: null })
+			.set({ deletedAt: new Date(), name: archivedName })
 			.where(eq(schema.team.id, teamId))
 			.returning()
 			.then(rows => rows[0]);
@@ -234,20 +224,6 @@ export class TeamRepository {
 		});
 	}
 
-	async updateUserCurrentTeam(
-		userId: number,
-		teamId: string | null,
-		role: TeamRoleEnum | null,
-	): Promise<void> {
-		await this.db
-			.update(schema.users)
-			.set({
-				currentTeamId: teamId,
-				currentTeamRole: role,
-			})
-			.where(eq(schema.users.id, userId));
-	}
-
 	async findTeamManagementRow(teamId: number): Promise<TeamManagementRow | undefined> {
 		const memberCountSql = this.memberCountSql();
 
@@ -261,7 +237,6 @@ export class TeamRepository {
 				schema.team.id,
 				schema.team.publicId,
 				schema.team.name,
-				schema.team.slug,
 				schema.team.status,
 				schema.team.ownerId,
 				schema.team.deletedAt,
@@ -284,7 +259,6 @@ export class TeamRepository {
 			id: schema.team.id,
 			publicId: schema.team.publicId,
 			name: schema.team.name,
-			slug: schema.team.slug,
 			status: schema.team.status,
 			deletedAt: schema.team.deletedAt,
 			createdAt: schema.team.createdAt,
