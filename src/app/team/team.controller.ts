@@ -104,6 +104,16 @@ export class TeamController {
 		return createApiResponse(HttpStatus.OK, 'Team archived successfully', result);
 	}
 
+	@Post('deselect')
+	async deselectTeam(
+		@CurrentUser() currentUser: UserWithoutPassword,
+		@Request() request: ExpressRequest,
+	): Promise<ApiResponse<SelectTeamResponse>> {
+		const result = await this.teamService.deselectTeam(currentUser, request);
+
+		return createApiResponse(HttpStatus.OK, 'Team deselected successfully', result);
+	}
+
 	@Post(':id/select')
 	async selectTeam(
 		@Param('id', ParseUUIDPipe) id: string,

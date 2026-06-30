@@ -363,6 +363,26 @@ export class TeamService {
 		};
 	}
 
+	async deselectTeam(
+		currentUser: UserWithoutPassword,
+		request?: Request,
+	): Promise<SelectTeamResponse> {
+		await this.teamRepository.updateUserCurrentTeam(currentUser.id, null, null);
+
+		await this.auditLogService.logAction({
+			actor: currentUser,
+			action: 'TEAM_DESELECTED',
+			targetType: 'team',
+			targetId: '',
+			request,
+		});
+
+		return {
+			currentTeamId: null,
+			currentTeamRole: null,
+		};
+	}
+
 	private async findActiveTeamByPublicId(publicId: string) {
 		const team = await this.teamRepository.findTeamByPublicId(publicId);
 
