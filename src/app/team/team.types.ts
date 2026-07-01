@@ -31,7 +31,6 @@ export type TeamMemberRow = {
 export type TeamManagementResponse = {
 	id: string;
 	name: string;
-	slug: string | null;
 	status: TeamStatusEnum;
 	memberCount: number;
 	owner: {

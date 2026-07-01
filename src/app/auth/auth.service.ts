@@ -429,8 +429,6 @@ export class AuthService {
 			emailVerified: profile.emailVerified,
 			phone: null,
 			role: 'USER',
-			currentTeamId: null,
-			currentTeamRole: null,
 			isApproved,
 		});
 

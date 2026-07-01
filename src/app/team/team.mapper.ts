@@ -9,7 +9,6 @@ export function mapTeamManagementResponse(row: TeamManagementRow): TeamManagemen
 	return {
 		id: row.publicId,
 		name: row.name,
-		slug: row.slug,
 		status: row.status,
 		memberCount: Number(row.memberCount ?? 0),
 		owner:
