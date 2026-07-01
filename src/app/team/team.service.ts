@@ -223,9 +223,18 @@ export class TeamService {
 		const existingMembers = await this.teamRepository.findTeamMembersByTeamId(team.id);
 		const existingMemberUserIds = new Set(existingMembers.map(m => m.userId));
 
-		const usersToAdd = existingUsers.filter(u => !existingMemberUserIds.has(u.id));
+		const alreadyMemberEmails = existingUsers
+			.filter(u => existingMemberUserIds.has(u.id))
+			.map(u => u.email);
 
-		const added = await this.addMembersToTeam(team.id, usersToAdd, data.members, missingEmails);
+		if (alreadyMemberEmails.length > 0) {
+			throw conflictError(
+				'team_member_already_exists',
+				`The following members are already part of this team: ${alreadyMemberEmails.join(', ')}`,
+			);
+		}
+
+		const added = await this.addMembersToTeam(team.id, existingUsers, data.members, missingEmails);
 
 		await this.auditLogService.logAction({
 			actor: currentUser,
