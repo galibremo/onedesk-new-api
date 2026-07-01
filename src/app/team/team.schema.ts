@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { baseQuerySchema, type SortableField } from '../../core/validators/base-query.schema';
 import {
 	validateArray,
+	validateEmail,
 	validateEnum,
 	validateString,
 	validateUUID,
@@ -82,11 +83,12 @@ export const updateTeamSchema = z
 
 export const addTeamMembersSchema = z
 	.object({
+		teamId: validateUUID('Team ID').optional(),
 		members: validateArray(
 			'Members',
 			z
 				.object({
-					userId: validateUUID('User ID'),
+					email: validateEmail.transform(value => value.toLowerCase()),
 					role: validateEnum('Role', teamRoleValues),
 				})
 				.strict(),

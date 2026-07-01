@@ -211,48 +211,75 @@ export class TeamService {
 
 		TeamPolicy.assertCanManageTeam(currentUser, team.ownerId);
 
-		const userPublicIds = data.members.map(m => m.userId);
-		const users = await this.teamRepository.findUsersByPublicIds(userPublicIds);
+		const emails = data.members.map(m => m.email);
+		const existingUsers = await this.teamRepository.findUsersByEmails(emails);
+		const existingEmailSet = new Set(existingUsers.map(u => u.email));
+		const missingEmails = emails.filter(e => !existingEmailSet.has(e));
 
-		if (users.length !== userPublicIds.length) {
-			throw notFoundError('user_not_found', 'One or more users were not found.');
-		}
-
-		for (const user of users) {
+		for (const user of existingUsers) {
 			TeamPolicy.assertCanAddMember(user);
 		}
 
 		const existingMembers = await this.teamRepository.findTeamMembersByTeamId(team.id);
-		const existingUserIds = new Set(existingMembers.map(m => m.userId));
+		const existingMemberUserIds = new Set(existingMembers.map(m => m.userId));
 
-		const newMembers = users
-			.filter(u => !existingUserIds.has(u.id))
-			.map(u => {
-				const memberData = data.members.find(m => m.userId === u.publicId)!;
-				return {
-					teamId: team.id,
-					userId: u.id,
-					role: memberData.role,
-					status: 'ACTIVE' as const,
-				};
-			});
+		const usersToAdd = existingUsers.filter(u => !existingMemberUserIds.has(u.id));
 
-		if (newMembers.length === 0) {
-			throw conflictError('members_already_exist', 'All provided users are already team members.');
-		}
-
-		const added = await this.teamRepository.createTeamMembers(newMembers);
+		const added = await this.addMembersToTeam(team.id, usersToAdd, data.members, missingEmails);
 
 		await this.auditLogService.logAction({
 			actor: currentUser,
 			action: 'TEAM_MEMBERS_ADDED',
 			targetType: 'team',
 			targetId: team.publicId,
-			metadata: { added, memberIds: userPublicIds },
+			metadata: { added, emails },
 			request,
 		});
 
 		return { added };
+	}
+
+	private async addMembersToTeam(
+		teamId: number,
+		existingUsers: { id: number; email: string }[],
+		memberDataList: AddTeamMembersDto['members'],
+		missingEmails: string[],
+	): Promise<number> {
+		let added = 0;
+
+		if (existingUsers.length > 0) {
+			const newMembers = existingUsers.map(u => {
+				const memberData = memberDataList.find(m => m.email === u.email)!;
+				return {
+					teamId,
+					userId: u.id,
+					role: memberData.role,
+					status: 'ACTIVE' as const,
+				};
+			});
+
+			added += await this.teamRepository.createTeamMembers(newMembers);
+		}
+
+		if (missingEmails.length > 0) {
+			for (const email of missingEmails) {
+				const newUser = await this.teamRepository.createUserByEmail(email);
+				if (newUser) {
+					const memberData = memberDataList.find(m => m.email === email)!;
+					const created = await this.teamRepository.createTeamMembers([
+						{
+							teamId,
+							userId: newUser.id,
+							role: memberData.role,
+							status: 'INVITED' as const,
+						},
+					]);
+					added += created;
+				}
+			}
+		}
+
+		return added;
 	}
 
 	async removeTeamMembers(

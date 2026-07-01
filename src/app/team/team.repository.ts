@@ -53,6 +53,22 @@ export class TeamRepository {
 		});
 	}
 
+	async findUsersByEmails(emails: string[]): Promise<UserSchemaType[]> {
+		if (emails.length === 0) return [];
+
+		return this.db.query.users.findMany({
+			where: inArray(schema.users.email, emails),
+		});
+	}
+
+	async createUserByEmail(email: string): Promise<UserSchemaType | undefined> {
+		return this.db
+			.insert(schema.users)
+			.values({ email, emailVerified: false, role: 'USER', isApproved: true })
+			.returning()
+			.then(rows => rows[0]);
+	}
+
 	async listTeams(query: TeamListQueryDto): Promise<{
 		rows: TeamManagementRow[];
 		total: number;
@@ -127,9 +143,13 @@ export class TeamRepository {
 
 	async findTeamMembersByTeamId(
 		teamId: number,
-	): Promise<Array<{ userId: number; role: TeamRoleEnum }>> {
+	): Promise<Array<{ userId: number; role: TeamRoleEnum; status: TeamMemberStatusEnum }>> {
 		return this.db
-			.select({ userId: schema.teamMembers.userId, role: schema.teamMembers.role })
+			.select({
+				userId: schema.teamMembers.userId,
+				role: schema.teamMembers.role,
+				status: schema.teamMembers.status,
+			})
 			.from(schema.teamMembers)
 			.where(eq(schema.teamMembers.teamId, teamId));
 	}
@@ -199,6 +219,22 @@ export class TeamRepository {
 			.update(schema.teamMembers)
 			.set({ role })
 			.where(and(eq(schema.teamMembers.teamId, teamId), eq(schema.teamMembers.userId, userId)));
+	}
+
+	async reactivateTeamMember(teamId: number, userId: number): Promise<boolean> {
+		const result = await this.db
+			.update(schema.teamMembers)
+			.set({ status: 'ACTIVE' })
+			.where(
+				and(
+					eq(schema.teamMembers.teamId, teamId),
+					eq(schema.teamMembers.userId, userId),
+					inArray(schema.teamMembers.status, ['INACTIVE', 'INVITED']),
+				),
+			)
+			.returning();
+
+		return result.length > 0;
 	}
 
 	async removeTeamMembers(teamId: number, userIds: number[]): Promise<number> {
